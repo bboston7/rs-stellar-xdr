@@ -54,7 +54,7 @@ pub const XDR_FILES_SHA256: [(&str, &str); 12] = [
     ),
     (
         "xdr/curr/Stellar-overlay.x",
-        "de3957c58b96ae07968b3d3aebea84f83603e95322d1fa336360e13e3aba737a",
+        "c620257a402cb327642b769e1374e669a487917b50b5505691a662b3fbeb875d",
     ),
     (
         "xdr/curr/Stellar-transaction.x",
@@ -23553,6 +23553,89 @@ impl WriteXdr for SurveyResponseBody {
     }
 }
 
+/// TimeSlicedNodeData is an XDR Struct defines as:
+///
+/// ```text
+/// struct TimeSlicedNodeData
+/// {
+///     uint32 addedAuthenticatedPeers;
+///     uint32 droppedAuthenticatedPeers;
+///     uint32 totalInboundPeerCount;
+///     uint32 totalOutboundPeerCount;
+///
+///     // SCP stats
+///     uint32 p75SCPFirstToSelfLatencyNs;
+///     uint32 p75SCPSelfToOtherLatencyNs;
+///
+///     // How many times the node lost sync in the time slice
+///     uint32 lostSyncCount;
+///
+///     // Config data
+///     bool isValidator;
+///     uint32 maxInboundPeerCount;
+///     uint32 maxOutboundPeerCount;
+/// };
+/// ```
+///
+#[derive(Clone, Debug, Hash, PartialEq, Eq, PartialOrd, Ord)]
+#[cfg_attr(feature = "arbitrary", derive(Arbitrary))]
+#[cfg_attr(
+    all(feature = "serde", feature = "alloc"),
+    derive(serde::Serialize, serde::Deserialize),
+    serde(rename_all = "snake_case")
+)]
+pub struct TimeSlicedNodeData {
+    pub added_authenticated_peers: u32,
+    pub dropped_authenticated_peers: u32,
+    pub total_inbound_peer_count: u32,
+    pub total_outbound_peer_count: u32,
+    pub p75_scp_first_to_self_latency_ns: u32,
+    pub p75_scp_self_to_other_latency_ns: u32,
+    pub lost_sync_count: u32,
+    pub is_validator: bool,
+    pub max_inbound_peer_count: u32,
+    pub max_outbound_peer_count: u32,
+}
+
+impl ReadXdr for TimeSlicedNodeData {
+    #[cfg(feature = "std")]
+    fn read_xdr<R: Read>(r: &mut Limited<R>) -> Result<Self> {
+        r.with_limited_depth(|r| {
+            Ok(Self {
+                added_authenticated_peers: u32::read_xdr(r)?,
+                dropped_authenticated_peers: u32::read_xdr(r)?,
+                total_inbound_peer_count: u32::read_xdr(r)?,
+                total_outbound_peer_count: u32::read_xdr(r)?,
+                p75_scp_first_to_self_latency_ns: u32::read_xdr(r)?,
+                p75_scp_self_to_other_latency_ns: u32::read_xdr(r)?,
+                lost_sync_count: u32::read_xdr(r)?,
+                is_validator: bool::read_xdr(r)?,
+                max_inbound_peer_count: u32::read_xdr(r)?,
+                max_outbound_peer_count: u32::read_xdr(r)?,
+            })
+        })
+    }
+}
+
+impl WriteXdr for TimeSlicedNodeData {
+    #[cfg(feature = "std")]
+    fn write_xdr<W: Write>(&self, w: &mut Limited<W>) -> Result<()> {
+        w.with_limited_depth(|w| {
+            self.added_authenticated_peers.write_xdr(w)?;
+            self.dropped_authenticated_peers.write_xdr(w)?;
+            self.total_inbound_peer_count.write_xdr(w)?;
+            self.total_outbound_peer_count.write_xdr(w)?;
+            self.p75_scp_first_to_self_latency_ns.write_xdr(w)?;
+            self.p75_scp_self_to_other_latency_ns.write_xdr(w)?;
+            self.lost_sync_count.write_xdr(w)?;
+            self.is_validator.write_xdr(w)?;
+            self.max_inbound_peer_count.write_xdr(w)?;
+            self.max_outbound_peer_count.write_xdr(w)?;
+            Ok(())
+        })
+    }
+}
+
 /// TxAdvertVectorMaxSize is an XDR Const defines as:
 ///
 /// ```text
@@ -42687,6 +42770,7 @@ pub enum TypeVariant {
     TopologyResponseBodyV0,
     TopologyResponseBodyV1,
     SurveyResponseBody,
+    TimeSlicedNodeData,
     TxAdvertVector,
     FloodAdvert,
     TxDemandVector,
@@ -42871,7 +42955,7 @@ pub enum TypeVariant {
 }
 
 impl TypeVariant {
-    pub const VARIANTS: [TypeVariant; 422] = [
+    pub const VARIANTS: [TypeVariant; 423] = [
         TypeVariant::Value,
         TypeVariant::ScpBallot,
         TypeVariant::ScpStatementType,
@@ -43113,6 +43197,7 @@ impl TypeVariant {
         TypeVariant::TopologyResponseBodyV0,
         TypeVariant::TopologyResponseBodyV1,
         TypeVariant::SurveyResponseBody,
+        TypeVariant::TimeSlicedNodeData,
         TypeVariant::TxAdvertVector,
         TypeVariant::FloodAdvert,
         TypeVariant::TxDemandVector,
@@ -43295,7 +43380,7 @@ impl TypeVariant {
         TypeVariant::HmacSha256Key,
         TypeVariant::HmacSha256Mac,
     ];
-    pub const VARIANTS_STR: [&'static str; 422] = [
+    pub const VARIANTS_STR: [&'static str; 423] = [
         "Value",
         "ScpBallot",
         "ScpStatementType",
@@ -43537,6 +43622,7 @@ impl TypeVariant {
         "TopologyResponseBodyV0",
         "TopologyResponseBodyV1",
         "SurveyResponseBody",
+        "TimeSlicedNodeData",
         "TxAdvertVector",
         "FloodAdvert",
         "TxDemandVector",
@@ -43967,6 +44053,7 @@ impl TypeVariant {
             Self::TopologyResponseBodyV0 => "TopologyResponseBodyV0",
             Self::TopologyResponseBodyV1 => "TopologyResponseBodyV1",
             Self::SurveyResponseBody => "SurveyResponseBody",
+            Self::TimeSlicedNodeData => "TimeSlicedNodeData",
             Self::TxAdvertVector => "TxAdvertVector",
             Self::FloodAdvert => "FloodAdvert",
             Self::TxDemandVector => "TxDemandVector",
@@ -44157,7 +44244,7 @@ impl TypeVariant {
 
     #[must_use]
     #[allow(clippy::too_many_lines)]
-    pub const fn variants() -> [TypeVariant; 422] {
+    pub const fn variants() -> [TypeVariant; 423] {
         Self::VARIANTS
     }
 }
@@ -44427,6 +44514,7 @@ impl core::str::FromStr for TypeVariant {
             "TopologyResponseBodyV0" => Ok(Self::TopologyResponseBodyV0),
             "TopologyResponseBodyV1" => Ok(Self::TopologyResponseBodyV1),
             "SurveyResponseBody" => Ok(Self::SurveyResponseBody),
+            "TimeSlicedNodeData" => Ok(Self::TimeSlicedNodeData),
             "TxAdvertVector" => Ok(Self::TxAdvertVector),
             "FloodAdvert" => Ok(Self::FloodAdvert),
             "TxDemandVector" => Ok(Self::TxDemandVector),
@@ -44870,6 +44958,7 @@ pub enum Type {
     TopologyResponseBodyV0(Box<TopologyResponseBodyV0>),
     TopologyResponseBodyV1(Box<TopologyResponseBodyV1>),
     SurveyResponseBody(Box<SurveyResponseBody>),
+    TimeSlicedNodeData(Box<TimeSlicedNodeData>),
     TxAdvertVector(Box<TxAdvertVector>),
     FloodAdvert(Box<FloodAdvert>),
     TxDemandVector(Box<TxDemandVector>),
@@ -45054,7 +45143,7 @@ pub enum Type {
 }
 
 impl Type {
-    pub const VARIANTS: [TypeVariant; 422] = [
+    pub const VARIANTS: [TypeVariant; 423] = [
         TypeVariant::Value,
         TypeVariant::ScpBallot,
         TypeVariant::ScpStatementType,
@@ -45296,6 +45385,7 @@ impl Type {
         TypeVariant::TopologyResponseBodyV0,
         TypeVariant::TopologyResponseBodyV1,
         TypeVariant::SurveyResponseBody,
+        TypeVariant::TimeSlicedNodeData,
         TypeVariant::TxAdvertVector,
         TypeVariant::FloodAdvert,
         TypeVariant::TxDemandVector,
@@ -45478,7 +45568,7 @@ impl Type {
         TypeVariant::HmacSha256Key,
         TypeVariant::HmacSha256Mac,
     ];
-    pub const VARIANTS_STR: [&'static str; 422] = [
+    pub const VARIANTS_STR: [&'static str; 423] = [
         "Value",
         "ScpBallot",
         "ScpStatementType",
@@ -45720,6 +45810,7 @@ impl Type {
         "TopologyResponseBodyV0",
         "TopologyResponseBodyV1",
         "SurveyResponseBody",
+        "TimeSlicedNodeData",
         "TxAdvertVector",
         "FloodAdvert",
         "TxDemandVector",
@@ -46918,6 +47009,11 @@ impl Type {
             TypeVariant::SurveyResponseBody => r.with_limited_depth(|r| {
                 Ok(Self::SurveyResponseBody(Box::new(
                     SurveyResponseBody::read_xdr(r)?,
+                )))
+            }),
+            TypeVariant::TimeSlicedNodeData => r.with_limited_depth(|r| {
+                Ok(Self::TimeSlicedNodeData(Box::new(
+                    TimeSlicedNodeData::read_xdr(r)?,
                 )))
             }),
             TypeVariant::TxAdvertVector => r.with_limited_depth(|r| {
@@ -48772,6 +48868,10 @@ impl Type {
             TypeVariant::SurveyResponseBody => Box::new(
                 ReadXdrIter::<_, SurveyResponseBody>::new(&mut r.inner, r.limits.clone())
                     .map(|r| r.map(|t| Self::SurveyResponseBody(Box::new(t)))),
+            ),
+            TypeVariant::TimeSlicedNodeData => Box::new(
+                ReadXdrIter::<_, TimeSlicedNodeData>::new(&mut r.inner, r.limits.clone())
+                    .map(|r| r.map(|t| Self::TimeSlicedNodeData(Box::new(t)))),
             ),
             TypeVariant::TxAdvertVector => Box::new(
                 ReadXdrIter::<_, TxAdvertVector>::new(&mut r.inner, r.limits.clone())
@@ -50707,6 +50807,10 @@ impl Type {
                 ReadXdrIter::<_, Frame<SurveyResponseBody>>::new(&mut r.inner, r.limits.clone())
                     .map(|r| r.map(|t| Self::SurveyResponseBody(Box::new(t.0)))),
             ),
+            TypeVariant::TimeSlicedNodeData => Box::new(
+                ReadXdrIter::<_, Frame<TimeSlicedNodeData>>::new(&mut r.inner, r.limits.clone())
+                    .map(|r| r.map(|t| Self::TimeSlicedNodeData(Box::new(t.0)))),
+            ),
             TypeVariant::TxAdvertVector => Box::new(
                 ReadXdrIter::<_, Frame<TxAdvertVector>>::new(&mut r.inner, r.limits.clone())
                     .map(|r| r.map(|t| Self::TxAdvertVector(Box::new(t.0)))),
@@ -52627,6 +52731,10 @@ impl Type {
                 ReadXdrIter::<_, SurveyResponseBody>::new(dec, r.limits.clone())
                     .map(|r| r.map(|t| Self::SurveyResponseBody(Box::new(t)))),
             ),
+            TypeVariant::TimeSlicedNodeData => Box::new(
+                ReadXdrIter::<_, TimeSlicedNodeData>::new(dec, r.limits.clone())
+                    .map(|r| r.map(|t| Self::TimeSlicedNodeData(Box::new(t)))),
+            ),
             TypeVariant::TxAdvertVector => Box::new(
                 ReadXdrIter::<_, TxAdvertVector>::new(dec, r.limits.clone())
                     .map(|r| r.map(|t| Self::TxAdvertVector(Box::new(t)))),
@@ -54019,6 +54127,9 @@ impl Type {
             TypeVariant::SurveyResponseBody => Ok(Self::SurveyResponseBody(Box::new(
                 serde_json::from_reader(r)?,
             ))),
+            TypeVariant::TimeSlicedNodeData => Ok(Self::TimeSlicedNodeData(Box::new(
+                serde_json::from_reader(r)?,
+            ))),
             TypeVariant::TxAdvertVector => {
                 Ok(Self::TxAdvertVector(Box::new(serde_json::from_reader(r)?)))
             }
@@ -54776,6 +54887,7 @@ impl Type {
             Self::TopologyResponseBodyV0(ref v) => v.as_ref(),
             Self::TopologyResponseBodyV1(ref v) => v.as_ref(),
             Self::SurveyResponseBody(ref v) => v.as_ref(),
+            Self::TimeSlicedNodeData(ref v) => v.as_ref(),
             Self::TxAdvertVector(ref v) => v.as_ref(),
             Self::FloodAdvert(ref v) => v.as_ref(),
             Self::TxDemandVector(ref v) => v.as_ref(),
@@ -55211,6 +55323,7 @@ impl Type {
             Self::TopologyResponseBodyV0(_) => "TopologyResponseBodyV0",
             Self::TopologyResponseBodyV1(_) => "TopologyResponseBodyV1",
             Self::SurveyResponseBody(_) => "SurveyResponseBody",
+            Self::TimeSlicedNodeData(_) => "TimeSlicedNodeData",
             Self::TxAdvertVector(_) => "TxAdvertVector",
             Self::FloodAdvert(_) => "FloodAdvert",
             Self::TxDemandVector(_) => "TxDemandVector",
@@ -55405,7 +55518,7 @@ impl Type {
 
     #[must_use]
     #[allow(clippy::too_many_lines)]
-    pub const fn variants() -> [TypeVariant; 422] {
+    pub const fn variants() -> [TypeVariant; 423] {
         Self::VARIANTS
     }
 
@@ -55676,6 +55789,7 @@ impl Type {
             Self::TopologyResponseBodyV0(_) => TypeVariant::TopologyResponseBodyV0,
             Self::TopologyResponseBodyV1(_) => TypeVariant::TopologyResponseBodyV1,
             Self::SurveyResponseBody(_) => TypeVariant::SurveyResponseBody,
+            Self::TimeSlicedNodeData(_) => TypeVariant::TimeSlicedNodeData,
             Self::TxAdvertVector(_) => TypeVariant::TxAdvertVector,
             Self::FloodAdvert(_) => TypeVariant::FloodAdvert,
             Self::TxDemandVector(_) => TypeVariant::TxDemandVector,
@@ -56150,6 +56264,7 @@ impl WriteXdr for Type {
             Self::TopologyResponseBodyV0(v) => v.write_xdr(w),
             Self::TopologyResponseBodyV1(v) => v.write_xdr(w),
             Self::SurveyResponseBody(v) => v.write_xdr(w),
+            Self::TimeSlicedNodeData(v) => v.write_xdr(w),
             Self::TxAdvertVector(v) => v.write_xdr(w),
             Self::FloodAdvert(v) => v.write_xdr(w),
             Self::TxDemandVector(v) => v.write_xdr(w),
